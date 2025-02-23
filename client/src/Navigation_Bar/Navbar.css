@@ -1,0 +1,40 @@
+/* Navbar.css */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1e3c72;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.expman {
+    color: white;
+    margin-left: 30px;
+}
+.logout-button {
+    background-color: #dc3545;
+    margin-left: 20px;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.logout-button:hover {
+    background-color: #c82333;
+}
+.all-buttons {
+    margin-right: 50px;
+    margin-bottom: 20px;
+}
+.login-button {
+    margin-left: 50px;
+}
+.login-btn {
+    background-color: green;
+    color: #333;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+}

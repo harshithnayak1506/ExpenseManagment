@@ -1,0 +1,55 @@
+.report-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+  }
+  
+  .report-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    width: 80%;
+    max-width: 800px;
+  }
+  
+  /* 🔹 Wrapper to keep both charts side by side */
+  .charts-wrapper {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+    align-items: center;
+  }
+  
+  /* 🔹 Set fixed size for the charts */
+  .chart-container {
+    width: 45%;
+  }
+  
+  /* 🔹 Resize the pie chart */
+  .chart-container canvas {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .close-report {
+    margin-top: 10px;
+    padding: 10px;
+    border: none;
+    background-color: #d9534f;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .close-report:hover {
+    background-color: #c9302c;
+  }
+  
