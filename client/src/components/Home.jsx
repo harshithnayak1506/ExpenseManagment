@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import DataTable from "react-data-table-component";
 import { FaEdit, FaTrash, FaChartPie } from "react-icons/fa";
@@ -9,6 +10,7 @@ const Home = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [isReportOpen, setIsReportOpen] = useState(false);
+  const [selectedRows, setSelectedRows] = useState([]);
   const [expenseData, setExpenseData] = useState({
     user_id: "",
     amount: "",
@@ -21,11 +23,23 @@ const Home = () => {
   const [editIndex, setEditIndex] = useState(null);
 
   useEffect(() => {
-    const storedExpenses = localStorage.getItem("expenses");
-    if (storedExpenses) {
-      setExpenses(JSON.parse(storedExpenses));
-    }
+    const fetchExpenses = async () => {
+      const userId = localStorage.getItem("userId"); // Get logged-in user ID
+      if (!userId) return;
+  
+      try {
+        const response = await fetch(`http://localhost:3007/expense/${userId}`);
+        const data = await response.json();
+        setExpenses(data);
+      } catch (error) {
+        console.error("Error fetching expenses:", error);
+      }
+    };
+  
+    fetchExpenses();
   }, []);
+  
+  
 
   const updateLocalStorage = (data) => {
     localStorage.setItem("expenses", JSON.stringify(data));
@@ -35,68 +49,131 @@ const Home = () => {
     setExpenseData({ ...expenseData, [e.target.name]: e.target.value });
   };
 
-  const handleAddExpense = () => {
+  const handleAddExpense = async () => {
     if (!expenseData.amount || !expenseData.category || !expenseData.date) {
       return alert("Please fill in all required fields.");
     }
-
+  
+    const userId = localStorage.getItem("userId");
+    if (!userId) return alert("User not logged in!");
+  
     const newExpense = {
-      id: editIndex !== null ? expenses[editIndex].id : Date.now(),
-      ...expenseData,
       amount: parseFloat(expenseData.amount),
-      created_at: editIndex !== null ? expenses[editIndex].created_at : new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      category: expenseData.category,
+      payment_method: expenseData.payment_method,
+      date: expenseData.date,
     };
-
-    let updatedExpenses;
-    if (editIndex !== null) {
-      updatedExpenses = [...expenses];
-      updatedExpenses[editIndex] = newExpense;
+  
+    try {
+      let response;
+      if (editIndex !== null) {
+        response = await fetch(`http://localhost:3007/expense/update/${userId}/${expenses[editIndex]._id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newExpense),
+        });
+      } else {
+        response = await fetch(`http://localhost:3007/expense/add/${userId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newExpense),
+        });
+      }
+  
+      const updatedExpenses = await response.json();
+      setExpenses(updatedExpenses.expenses);
       setEditIndex(null);
-    } else {
-      updatedExpenses = [...expenses, newExpense];
+    } catch (error) {
+      console.error("Error adding/updating expense:", error);
     }
-
-    setExpenses(updatedExpenses);
-    updateLocalStorage(updatedExpenses);
-    setExpenseData({
-      user_id: "",
-      amount: "",
-      category: "",
-      payment_method: "",
-      date: "",
-      status: "Pending",
-      receipt_url: "",
-    });
-
+  
+    setExpenseData({ user_id: "", amount: "", category: "", payment_method: "", date: "", status: "Pending", receipt_url: "" });
     setIsFormOpen(false);
   };
+  
+  
 
-  const handleDelete = (index) => {
-    const updatedExpenses = expenses.filter((_, i) => i !== index);
-    setExpenses(updatedExpenses);
-    updateLocalStorage(updatedExpenses);
+  const handleDelete = async (index) => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return alert("User not logged in!");
+  
+    const expenseId = expenses[index]._id;
+  
+    try {
+      const response = await fetch(`http://localhost:3007/expense/delete/${userId}/${expenseId}`, { method: "DELETE" });
+      const updatedExpenses = await response.json();
+      setExpenses(updatedExpenses.remainingExpenses);
+    } catch (error) {
+      console.error("Error deleting expense:", error);
+    }
   };
-
+  
+  
   const handleEdit = (index) => {
     setExpenseData(expenses[index]);
     setEditIndex(index);
     setIsFormOpen(true);
   };
 
+  // Checkbox Selection
+  const handleCheckboxChange = (id) => {
+    setSelectedRows((prevSelected) => {
+      if (prevSelected.includes(id)) {
+        return prevSelected.filter((rowId) => rowId !== id);
+      } else {
+        return [...prevSelected, id];
+      }
+    });
+  };
+  
+  
+
+  const handleBulkDelete = async () => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return alert("User not logged in!");
+  
+    try {
+      const response = await fetch(`http://localhost:3007/expense/delete-multiple/${userId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ expenseIds: selectedRows }),
+      });
+  
+      const updatedExpenses = await response.json();
+      setExpenses(updatedExpenses.remainingExpenses);
+      setSelectedRows([]); // Clear selection
+    } catch (error) {
+      console.error("Error deleting expenses:", error);
+    }
+  };
+  
+  
+
   // 🔹 Filtering logic for the search bar
   const filteredExpenses = expenses.filter((expense) =>
-    expense.user_id.toLowerCase().includes(searchText.toLowerCase()) ||
-    expense.category.toLowerCase().includes(searchText.toLowerCase()) ||
-    expense.payment_method.toLowerCase().includes(searchText.toLowerCase())
+    (expense?.user_id?.toLowerCase() || "").includes(searchText.toLowerCase()) ||
+    (expense?.category?.toLowerCase() || "").includes(searchText.toLowerCase()) ||
+    (expense?.payment_method?.toLowerCase() || "").includes(searchText.toLowerCase())
   );
+  
+  
 
-  const categories = ["Food", "Travel", "Bills", "Shopping", "Health", "Entertainment", "Rent", "Education", "Miscellaneous","Salary", "Bonus", "Investment", "Freelance", "Refund"];
+  const categories = ["Food", "Travel", "Bills", "Shopping", "Health", "Entertainment", "Rent", "Education", "Miscellaneous", "Salary", "Bonus", "Investment", "Freelance", "Refund"];
   const paymentMethods = ["Cash", "Credit Card", "Debit Card", "Bank Transfer", "UPI", "PayPal"];
 
   const columns = [
-    { name: "ID", selector: (row) => row.id, sortable: true, width: "120px" },
-    { name: "User ID", selector: (row) => row.user_id, sortable: true },
+    {
+      name: "",
+      cell: (row) => (
+        <input
+          type="checkbox"
+          checked={selectedRows.includes(row._id)}
+          onChange={() => handleCheckboxChange(row._id)}
+        />
+      ),
+      width: "50px",
+    },
+    { name: "ID", selector: (row) => row._id, sortable: true, width: "180px" }, // Display the document ID
     { name: "Amount ($)", selector: (row) => (row.amount ? row.amount.toFixed(2) : "0.00"), sortable: true },
     { name: "Category", selector: (row) => row.category, sortable: true },
     { name: "Payment Method", selector: (row) => row.payment_method, sortable: true },
@@ -106,7 +183,7 @@ const Home = () => {
       cell: (_, index) => (
         <div className="action-buttons">
           <button className="icon-button" onClick={() => handleEdit(index)}>
-            <FaEdit size={22} color="green" />
+            <FaEdit size={22} color="white" />
           </button>
           <button className="icon-button" onClick={() => handleDelete(index)}>
             <FaTrash size={22} color="red" />
@@ -115,6 +192,8 @@ const Home = () => {
       ),
     },
   ];
+  
+  
 
   return (
     <div className="container">
@@ -128,7 +207,7 @@ const Home = () => {
           className="search-bar"
         />
 
-<button className="report-button" onClick={() => setIsReportOpen(true)}>
+        <button className="report-button" onClick={() => setIsReportOpen(true)}>
           <FaChartPie size={20} /> {/* Pie Chart Icon */}
         </button>
 
@@ -141,7 +220,7 @@ const Home = () => {
       {isFormOpen && (
         <div className="modal">
           <h2>{editIndex !== null ? "Edit Expense" : "New Expense"}</h2>
-          <input type="text" name="user_id" placeholder="User ID" value={expenseData.user_id} onChange={handleChange} className="input" />
+          <input type="text" name="user_id" placeholder="User ID" value={expenseData.user_id} onChange={handleChange} className="input" disabled/>
           <input type="number" name="amount" placeholder="Amount" value={expenseData.amount} onChange={handleChange} className="input" />
 
           <select name="category" value={expenseData.category} onChange={handleChange} className="input">
@@ -155,13 +234,21 @@ const Home = () => {
           </select>
 
           <input type="date" name="date" value={expenseData.date} onChange={handleChange} className="input" />
-          
+
           <button className="save-button" onClick={handleAddExpense}>Save</button>
           <button className="close-button" onClick={() => setIsFormOpen(false)}>Cancel</button>
         </div>
-        
       )}
+
       {isReportOpen && <Report expenses={expenses} onClose={() => setIsReportOpen(false)} />}
+
+      {/* Bulk Delete Button - Appears when multiple checkboxes are selected */}
+      {selectedRows.length > 1 && (
+  <button className="bulk-delete-button" onClick={handleBulkDelete}>
+    Delete Selected
+  </button>
+)}
+
     </div>
   );
 };

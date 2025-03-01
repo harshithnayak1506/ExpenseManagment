@@ -29,7 +29,8 @@
   }
   
   .new-expense-button {
-    padding: 10px 20px;
+    margin-left: 10px;
+    width: 180px;
     background-color: #28a745;
     color: white;
     border: none;
@@ -50,7 +51,7 @@
   
   .icon-button {
     border: none;
-    background: transparent;
+    background: black;
     cursor: pointer;
   }
   

@@ -1,34 +1,24 @@
-const express=require('express')
-const mongoose=require('mongoose')
-const cors=require('cors')
-const app=express();
-app.use(express.json())
-app.use(cors())
-const userModel=require('./models/Expense')
-mongoose.connect("mongodb://127.0.0.1:27017/AllExpenses")
+require("dotenv").config();
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
 
-app.post('/login',(req,res) => {
-    const {email,password} = req.body;
-    userModel.findOne({email : email})
-    .then(user => {
-        if(user) {
-            if(user.password == password) {
-                res.json('Successful Login')
-            }else {
-                res.json('Email/password is incorrect')
-            }
-        }else {
-            res.json('No record found!!!')
-        }
-    })
-})
+const userRoutes = require("./routes/userRoutes");
+const expenseRoutes = require("./routes/expenseRoutes");
 
-app.post('/register',(req,res) => {
-    console.log("Recieved data : ",req.body);
-    userModel.create(req.body)
-    .then(users => res.json(users))
-    .catch(err => res.json(err))
+const app = express();
+
+app.use(express.json());
+app.use(cors());
+
+mongoose.connect("mongodb://127.0.0.1:27017/AllExpenses", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 })
-app.listen(3007, () => {
-    console.log("MongoDB is connected")
-})
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.log("MongoDB Connection Failed", err));
+
+app.use("/user", userRoutes);
+app.use("/expense", expenseRoutes);
+
+app.listen(3007, () => console.log("Server running on port 3007"));

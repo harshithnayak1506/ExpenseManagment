@@ -1,8 +1,12 @@
-const mongoose=require('mongoose')
-const usersSchema = new mongoose.Schema( {
-    username: String,
-    email: String,
-    password: String
-})
-const userModel=mongoose.model("users",usersSchema)
-module.exports=userModel;
+const mongoose = require("mongoose");
+
+const ExpenseSchema = new mongoose.Schema({
+  userId: { type: String, required: true }, // Linked to User
+  amount: Number,
+  category: String,
+  payment_method: String,
+  date: Date,
+  status: { type: String, default: "Pending" },
+});
+
+module.exports = mongoose.model("Expense", ExpenseSchema);
