@@ -5,11 +5,13 @@ import Login from "./components/Login";
 import Home from "./components/Home";
 import Signup from "./components/Signup";
 import Welcome from "./components/Welcome";
+import './App.css';
+import Footer from "./Navigation_Bar/Footer";
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    useEffect(() => {
+    useEffect(( ) => {
         // Check if the user is logged in on page load
         setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
     }, []);
@@ -22,6 +24,7 @@ function App() {
                 <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
                 <Route path="/register" element={<Signup />} />
             </Routes>
+            <Footer />
         </BrowserRouter>
     );
 }

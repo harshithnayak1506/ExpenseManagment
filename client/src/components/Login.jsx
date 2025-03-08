@@ -8,6 +8,7 @@ function Login({ setIsLoggedIn }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState(""); // Error state
+    const [isSuccess, setIsSuccess]=useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -33,6 +34,7 @@ function Login({ setIsLoggedIn }) {
 
     return (
         <div className="login-container">
+            {isSuccess && <div className="success-message">✅ Login Successful!</div>}
             <h1>Login</h1>
             <form onSubmit={handleSubmit}>
                 {error && <p className="error-message">{error}</p>} {/* Display error if any */}
@@ -62,7 +64,7 @@ function Login({ setIsLoggedIn }) {
                 </div>
                 <button type="submit">Login</button>
                 <div>
-                    <p>Don't have an account? <Link to="/register">Register</Link></p>
+                    <p className="para">Don't have an account? <Link to="/register">Register</Link></p>
                 </div>
             </form>
         </div>

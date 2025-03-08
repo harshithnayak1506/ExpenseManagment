@@ -42,7 +42,7 @@ function Signup() {
     };
 
     return (
-        <div className="container">
+        <div className="signup-container">
             <h1>Register</h1>
             <form onSubmit={handleSubmit}>
                 {error && <p className="error-message">{error}</p>} {/* Show error message */}

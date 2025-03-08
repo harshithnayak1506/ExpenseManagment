@@ -15,7 +15,7 @@ function Navbar({ isLoggedIn, setIsLoggedIn }) {
 
   return (
     <nav className="navbar">
-      <h1 className="expman">EXPMAN</h1>
+      <h1 className="expman" onClick={() => navigate("/")}>EXPMAN</h1>
 
       <div className="center-section">
         <button className="home-button" onClick={() => navigate('/')}>Home</button>

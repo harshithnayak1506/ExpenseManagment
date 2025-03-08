@@ -1,0 +1,21 @@
+/* Footer Styling */
+.footer {
+    background-color: #001f3f; /* Navy Blue */
+    color: white;
+    text-align: center;
+    font-size: 14px;
+    padding: 8px 0; /* Less height */
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 600px) {
+    .footer {
+      font-size: 12px;
+      padding: 6px 0;
+    }
+  }
+  
